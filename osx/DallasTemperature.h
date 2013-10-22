@@ -2,8 +2,6 @@
 #define DallasTemperature_h
 
 
-#error should not be included
-
 #define DALLASTEMPLIBVERSION "3.7.2"
 
 // This library is free software; you can redistribute it and/or
@@ -64,13 +62,13 @@ class DallasTemperature
 {
   public:
 
-  DallasTemperature(OneWire*);
+  DallasTemperature(OneWire*) {}
 
   // initalise bus
-  void begin(void);
+  void begin(void) {}
 
   // returns the number of devices found on the bus
-  uint8_t getDeviceCount(void);
+  uint8_t getDeviceCount(void) { return 5; }
   
   // Is a conversion complete on the wire?
   bool isConversionComplete(void);
@@ -79,7 +77,13 @@ class DallasTemperature
   bool validAddress(uint8_t*);
 
   // finds an address at a given index on the bus 
-  bool getAddress(uint8_t*, const uint8_t);
+  bool getAddress(uint8_t* addr, const uint8_t idx)
+  {
+    for (int i=0; i<8; i++)
+    {
+        addr[i] = idx;
+    }
+  }
   
   // attempt to determine if the device at the given address is connected to the bus
   bool isConnected(uint8_t*);
@@ -118,7 +122,7 @@ class DallasTemperature
   bool getCheckForConversion(void);
   
   // sends command for all devices on the bus to perform a temperature conversion 
-  void requestTemperatures(void);
+  void requestTemperatures(void) {}
    
   // sends command for one device to perform a temperature conversion by address
   bool requestTemperaturesByAddress(uint8_t*);
@@ -126,8 +130,18 @@ class DallasTemperature
   // sends command for one device to perform a temperature conversion by index
   bool requestTemperaturesByIndex(uint8_t);
 
+//  static float last = 18.0f;
+
+  float last;  
   // returns temperature in degrees C
-  float getTempC(uint8_t*);
+  float getTempC(uint8_t*)
+  {
+    if (random()%10000>9998)
+    {  
+      last = 0.01f*(3200-(random()%1000));
+      }
+    return last;
+  }
 
   // returns temperature in degrees F
   float getTempF(uint8_t*);
@@ -141,7 +155,7 @@ class DallasTemperature
   // returns true if the bus requires parasite power
   bool isParasitePowerMode(void);
   
-  bool isConversionAvailable(uint8_t*);
+  bool isConversionAvailable(uint8_t*) { return true; } 
 
   #if REQUIRESALARMS
   

@@ -5,6 +5,8 @@
 #include <inttypes.h>
 #include <avr/eeprom.h>
 
+#include <stdio.h>
+
 
 //#undef eEE_ADDR
 //#define eEE_ADDR(EETOKEN) ((uint64_t)(void*)&(EETOKEN))
@@ -34,6 +36,11 @@ class eEEPROMClass
   public:
     uint8_t read(int a) { return data[a]; };
     void write(int a, uint8_t v) { data[a] = v; };
+
+     uint8_t * getData() 
+    { 
+      return data; 
+    }
 
 uint16_t readWord(int address)
 {
@@ -113,8 +120,7 @@ void memFill(int addr, uint8_t data, uint16_t len)
     uint8_t data[E2END+1];
 };
 
-//extern 
-eEEPROMClass eEEPROM;
+extern eEEPROMClass eEEPROM;
 
 
 #define eEE_ADDR(EETOKEN) ((ADDR_T)(void*)&(EETOKEN))

@@ -2,10 +2,11 @@
 #ifndef HardwareSerial_h
 #define HardwareSerial_h
 
-#include <Stream.h>
+//#include <Stream.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <termios.h>
+#include "Arduino.h"
 
 
 struct ring_buffer;
@@ -30,11 +31,11 @@ class HardwareSerial //: public Print // Stream
   public:
     HardwareSerial()
     {
-//#warning terminal setting wont be reset
     	tcgetattr(STDIN_FILENO,&old_tio);
     	new_tio=old_tio;
     	new_tio.c_lflag &=(~ICANON & ~ECHO);
     	tcsetattr(STDIN_FILENO,TCSANOW,&new_tio);
+    	
     };
 
     ~HardwareSerial()
@@ -45,12 +46,13 @@ class HardwareSerial //: public Print // Stream
 
 	struct termios old_tio, new_tio;
 
-
+#if 0
     HardwareSerial(ring_buffer *rx_buffer, ring_buffer *tx_buffer,
       volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
       volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
       volatile uint8_t *ucsrc, volatile uint8_t *udr,
       uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x);
+#endif      
     void begin(unsigned long) {};
     void begin(unsigned long, uint8_t) {};
     void end();
@@ -69,8 +71,10 @@ class HardwareSerial //: public Print // Stream
       
       return (FD_ISSET(0, &fds));
     } ;
+
     /* virtual */  int peek(void);
     /* virtual */  int read(void) { return getchar(); }
+#if 0
     /* virtual */  void flush(void);
     /* virtual */  size_t write(uint8_t);
     inline size_t write(unsigned long n) { return write((uint8_t)n); }
@@ -79,6 +83,7 @@ class HardwareSerial //: public Print // Stream
     inline size_t write(int n) { return write((uint8_t)n); }
     //using Print::write; // pull in write(str) and write(buf, size) from Print
     operator bool();
+#endif
     
         //size_t print(const __FlashStringHelper *);
     //size_t print(const String &);
@@ -135,8 +140,8 @@ class HardwareSerial //: public Print // Stream
                                     
 };
 
-//extern  HardwareSerial Serial;
-HardwareSerial Serial;
+extern HardwareSerial Serial;
+//HardwareSerial Serial;
 
 extern void serialEventRun(void) __attribute__((weak));
 
