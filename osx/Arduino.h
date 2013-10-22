@@ -10,6 +10,7 @@
 #include <sys/time.h>
 #include "avr/eeprom.h"
 
+
 typedef unsigned char boolean;
 typedef signed char 	int8_t;
 typedef unsigned char 	uint8_t;
@@ -39,6 +40,7 @@ typedef const char * PGM_P;
 #define INPUT  0x0
 #define OUTPUT 0x1
 
+#include "Serial.h"
 
 void digitalWrite(uint8_t, uint8_t);
 
