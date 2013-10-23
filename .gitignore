@@ -4,3 +4,4 @@ osx/*.oOxduino
 Oxduino.ino
 .cproject
 .project
+*.o
