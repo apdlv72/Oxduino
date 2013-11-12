@@ -256,7 +256,7 @@ void handleclient(int sock)
 			}
 			else
 			{
-				snprintf(buf, 1024, "%02i: %s\n",
+				snprintf(buf, 1024, "%02i: %s %s\n",
 						i,
 						pin.mode==INPUT  ? "<-  "   : "<=  ",
 						pin.iLevel==HIGH ? "*" : ".");
@@ -345,18 +345,18 @@ void * server(void * data)
 	setsockopt(sock_desc,SOL_SOCKET,SO_REUSEADDR,&optval,sizeof(optval));
 
 	k = bind(sock_desc,(struct sockaddr*)&server,sizeof(server));
-	perror("bind");
+	perror("OX: bind");
 
-	printf("listening on port 7777...\n");
+	printf("OX: listening on port 7777...\n");
 	k = listen(sock_desc,20);
-	perror("listen");
+	perror("OX: listen");
 	len = sizeof(client);
 
 	for (;;)
 	{
-		printf("accepting clients...\n");
+		printf("OX: accepting clients...\n");
 		temp_sock_desc = accept(sock_desc,(struct sockaddr*)&client,&len);
-		printf("new client connection\n");
+		printf("OX: new client connection\n");
 
 		while(1)
 		{
@@ -369,15 +369,94 @@ void * server(void * data)
 }
 
 
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <termios.h>
+#include <sys/ioctl.h>
+
+#include <stdlib.h>
+#include <syslog.h>
+#include <signal.h>
+
+#include <CoreFoundation/CoreFoundation.h>
+#include <SystemConfiguration/SystemConfiguration.h>
+
+#include <IOKit/IOKitLib.h>
+#include <IOKit/pwr_mgt/IOPMLib.h>
+#include <IOKit/ps/IOPSKeys.h>
+#include <IOKit/ps/IOPowerSources.h>
+#include <IOKit/IOCFPlugIn.h>
+#include <IOKit/hid/IOHIDKeys.h>
+#include <IOKit/hid/IOHIDLib.h>
+
+#include <IOKit/serial/IOSerialKeys.h>
+#include <IOKit/IOBSD.h>
+
+/*
+void init_serial(int *fd, unsigned int baud)
+{
+    struct termios options;
+    tcgetattr(*fd,&options);
+    switch(baud)
+    {
+       case  9600: cfsetispeed(&options, B9600); cfsetospeed(&options, B9600);  break;
+       case 19200: cfsetispeed(&options,B19200); cfsetospeed(&options,B19200); break;
+       case 38400: cfsetispeed(&options,B38400); cfsetospeed(&options,B38400); break;
+      default:     cfsetispeed(&options, B9600); cfsetospeed(&options, B9600); break;
+    }
+    options.c_cflag |= (CLOCAL | CREAD);
+    options.c_cflag &= ~PARENB;
+    options.c_cflag &= ~CSTOPB;
+    options.c_cflag &= ~CSIZE;
+    options.c_cflag |= CS8;
+    tcsetattr(*fd,TCSANOW,&options);
+}
+*/
+
+#include "Serial.h"
+
 int main(int argc, char * argv[])
 {
+	       if (argc>1)
+	       {
+	               const char * tty = argv[1];
+	               printf("OX: Opening %s\n", tty);
+	               int fd;
+	
+	               //fd = open("/dev/tty.SeriellerAnschluss", O_RDWR | O_NOCTTY | O_NDELAY);
+	               fd = open(tty, O_RDWR | O_NOCTTY | O_NDELAY);
+	               printf("OX: Opened RS232 on fd %i\n", fd);
+	
+	               if (fd == -1)
+	               {
+	            	   perror("OX: open_port: unable to open port");
+	            	   exit(2);
+	               }
+	
+	               init_port(&fd,9600);         //set serial port to 9600,8,n,1
+	               write(fd, "H\n", 2);
+
+	               close(0);
+	               close(1);
+	               dup(fd);
+	               dup(fd);
+	               
+	               printf("OX: DO YOU SEE STDOUT?\n");
+	               fprintf(stderr, "OX: DO YOU SEE STDERR?\n");
+	               fflush(stdout);
+	       }
+	
+
 	pthread_t server_thread;
 
 	pthread_create (&server_thread, NULL, server, NULL);
 
 	setup();
 
-	printf("entering event loop\n");
+	printf("OX: entering event loop\n");
 	sleep(2);
 
 	while (doRestart)
