@@ -11,6 +11,9 @@
 
 struct ring_buffer;
 
+void init_port(int *fd, unsigned int baud);
+
+
 class HardwareSerial //: public Print // Stream
 {
   private:
@@ -87,30 +90,30 @@ class HardwareSerial //: public Print // Stream
     
         //size_t print(const __FlashStringHelper *);
     //size_t print(const String &);
-    size_t print(const char c[]) { printf("%s", c); fflush(stdout); };
-    size_t print(char c) { printf("%c", c); fflush(stdout); };
-    size_t print(unsigned char c, int base = DEC) { printNumber(c, base); };
-    size_t print(int i, int = DEC) { printf("%02i", i); fflush(stdout); };
-    size_t print(unsigned int i, int base = DEC) { printNumber(i, base);  };
-    size_t print(long i, int = DEC) { printf("%02li", i); fflush(stdout); };
-    size_t print(unsigned long i, int base = DEC) { printNumber(i, base);};
-    size_t print(double d, int = 2) { printf("%2.2f", d); fflush(stdout); };
+    size_t print(const char c[]) { int j=printf("%s", c); fflush(stdout); return j; };
+    size_t print(char c) { int j=printf("%c", c); fflush(stdout); return j; };
+    size_t print(unsigned char c, int base = DEC) { return printNumber(c, base); };
+    size_t print(int i, int = DEC) { int j=printf("%02i", i); fflush(stdout); return j; };
+    size_t print(unsigned int i, int base = DEC) { return printNumber(i, base);  };
+    size_t print(long i, int = DEC) { int j=printf("%02li", i); fflush(stdout); return j; };
+    size_t print(unsigned long i, int base = DEC) { return printNumber(i, base);};
+    size_t print(double d, int = 2) { int j=printf("%2.2f", d); fflush(stdout); return j; };
     //size_t print(const char * s);
     //size_t print(const Printable&);
 
     //ize_t println(const __FlashStringHelper *);
     //size_t println(const String &s);
-    size_t println(const char c[]) { printf("%s\n", c); fflush(stdout); };
-    size_t println(char c) { printf("%c\n", c); fflush(stdout); };
-    size_t println(unsigned char c, int base = DEC) { printNumber(c, base); printf("\n"); fflush(stdout); };
-    size_t println(int i, int base = DEC) { printNumber(i, base); printf("\n"); fflush(stdout); };
-    size_t println(unsigned int i, int base = DEC) { printNumber(i, base); printf("\n"); fflush(stdout); };
-    size_t println(long i, int base = DEC) { printNumber(i, base); printf("\n"); fflush(stdout); };
-    size_t println(unsigned long i, int base = DEC) { printNumber(i, base); printf("\n"); fflush(stdout); };
-    size_t println(double d, int = 2) { printf("%2.2f\n", d); fflush(stdout); };
+    size_t println(const char c[]) { int j=printf("%s\n", c); fflush(stdout); return j; };
+    size_t println(char c) { int j=printf("%c\n", c); fflush(stdout); return j; };
+    size_t println(unsigned char c, int base = DEC) { int j=printNumber(c, base); printf("\n"); fflush(stdout); return j+1; };
+    size_t println(int i, int base = DEC) { int j=printNumber(i, base); printf("\n"); fflush(stdout); return j+1; };
+    size_t println(unsigned int i, int base = DEC) { int j=printNumber(i, base); printf("\n"); fflush(stdout); return j+1; };
+    size_t println(long i, int base = DEC) { int j=printNumber(i, base); printf("\n"); fflush(stdout); return j+1; };
+    size_t println(unsigned long i, int base = DEC) { int j=printNumber(i, base); printf("\n"); fflush(stdout); return j+1; };
+    size_t println(double d, int = 2) { int j=printf("%2.2f\n", d); fflush(stdout); return j; };
     //size_t println(const char * s);
     //size_t println(const Printable&);
-    size_t println(void) { printf("\n"); fflush(stdout); fflush(stdout); };
+    size_t println(void) { int j=printf("\n"); fflush(stdout); fflush(stdout); return j; };
 
 
   size_t printNumber(unsigned long n, uint8_t base) {

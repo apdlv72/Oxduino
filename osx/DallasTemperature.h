@@ -83,6 +83,7 @@ class DallasTemperature
     {
         addr[i] = idx;
     }
+    return true;
   }
   
   // attempt to determine if the device at the given address is connected to the bus
