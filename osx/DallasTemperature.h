@@ -79,10 +79,15 @@ class DallasTemperature
   // finds an address at a given index on the bus 
   bool getAddress(uint8_t* addr, const uint8_t idx)
   {
+    // 28;xx;xx;xx;04;00;00;xx
     for (int i=0; i<8; i++)
-    {
-        addr[i] = idx;
+    {      
+        addr[i] = idx+1;
     }
+    addr[0] = 0x28;
+    addr[4] = 0x04;
+    addr[5] = 0x00;
+    addr[6] = 0x00;
     return true;
   }
   

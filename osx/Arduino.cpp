@@ -444,7 +444,7 @@ int main(int argc, char * argv[])
 	               dup(fd);
 	               dup(fd);
 	               
-	               printf("OX: DO YOU SEE STDOUT?\n");
+	               fprintf(stderr, "OX: DO YOU SEE STDOUT?\n");
 	               fprintf(stderr, "OX: DO YOU SEE STDERR?\n");
 	               fflush(stdout);
 	       }
@@ -454,9 +454,12 @@ int main(int argc, char * argv[])
 
 	pthread_create (&server_thread, NULL, server, NULL);
 
+	fflush(stderr);
+	usleep(10*1000);
 	setup();
 
-	printf("OX: entering event loop\n");
+	fprintf(stderr, "OX: entering event loop\n");
+	fflush(stderr);
 	sleep(2);
 
 	while (doRestart)
