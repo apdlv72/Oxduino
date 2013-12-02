@@ -97,7 +97,8 @@ class HardwareSerial //: public Print // Stream
     size_t print(unsigned int i, int base = DEC)    { return printNumber(i, base, 0); };
     size_t print(long i, int base = DEC)            { return printNumber(i, base, 0); };
     size_t print(unsigned long i, int base = DEC)   { return printNumber(i, base, 0); };
-    size_t print(double d, int = 2)                 { int j=printf("%2.2f", d); fflush(stdout); return j; };
+    size_t print(double d, int prec = 2)            { return printDouble(d, prec, false); };
+    size_t print(float f, int prec = 2)             { return printDouble(f, prec, false);  };
     //size_t print(const char * s);
     //size_t print(const Printable&);
 
@@ -110,11 +111,24 @@ class HardwareSerial //: public Print // Stream
     size_t println(unsigned int i, int base = DEC)  { return printNumber(i, base, 1); };
     size_t println(long i, int base = DEC)          { return printNumber(i, base, 1); };
     size_t println(unsigned long i, int base = DEC) { return printNumber(i, base, 1); };
-    size_t println(double d, int = 2)               { int j=printf("%2.2f\n", d); fflush(stdout); return j; };
+    size_t println(double d, int prec = 2)          { return printDouble(d, prec, true); };
+    size_t println(float f, int prec = 2)           { return printDouble(f, prec, true); };
     //size_t println(const char * s);
     //size_t println(const Printable&);
     size_t println(void) { int j=printf("\n"); fflush(stdout); fflush(stdout); return j; };
 
+    
+    size_t printDouble(double d, unsigned int prec, boolean cr)
+    {
+      char format[16];
+      sprintf(format, "%%1.%if", prec);
+      
+      int rc = printf(format, d);
+      if (cr) rc+=printf("\n");
+      
+      fflush(stdout);
+      return rc;
+    }
 
     size_t printNumber(unsigned long n, uint8_t base) {
     	return printNumber(n, base, false);
