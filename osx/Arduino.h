@@ -10,6 +10,7 @@
 #include <sys/time.h>
 #include "avr/eeprom.h"
 
+extern uint8_t doRestart;
 
 typedef unsigned char boolean;
 typedef signed char 	int8_t;

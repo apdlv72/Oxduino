@@ -78,7 +78,7 @@ s_state;
 
 s_state currState;
 boolean oDumpEEProm = false;
-boolean doRestart   = true;
+uint8_t doRestart   = true;
 unsigned long __micros_first = 0;
 
 
@@ -89,9 +89,10 @@ unsigned long micros(void)
 	long m = (time.tv_sec * 1000000) + time.tv_usec;
 	if (!__micros_first) __micros_first=m;
 	m-=__micros_first;
-	//	printf("micros: %li\n", m);
+	//printf("micros: %li\n", m);
 	return m;
 }
+
 
 unsigned long millis(void) 
 {
@@ -456,11 +457,11 @@ int main(int argc, char * argv[])
 
 	fflush(stderr);
 	usleep(10*1000);
-	setup();
+	//setup();
 
 	fprintf(stderr, "OX: entering event loop\n");
 	fflush(stderr);
-	sleep(2);
+	sleep(1);
 
 	while (doRestart)
 	{
