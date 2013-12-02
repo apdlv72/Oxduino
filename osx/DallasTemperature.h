@@ -1,6 +1,8 @@
 #ifndef DallasTemperature_h
 #define DallasTemperature_h
 
+#include <sys/time.h>
+
 
 #define DALLASTEMPLIBVERSION "3.7.2"
 
@@ -58,6 +60,16 @@
 
 typedef uint8_t DeviceAddress[8];
 
+
+static const DeviceAddress defaultAddresses[] = 
+{
+  { 0x28, 0x89, 0x48, 0xC8, 0x04, 0x00, 0x00, 0x0E },
+  { 0x28, 0x50, 0x81, 0xE1, 0x04, 0x00, 0x00, 0x0E },
+  { 0x28, 0x7B, 0x2E, 0xD9, 0x04, 0x00, 0x00, 0x28 },
+  { 0x28, 0x29, 0x7F, 0xC8, 0x04, 0x00, 0x00, 0x87 },
+  { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+};
+
 class DallasTemperature
 {
   public:
@@ -68,7 +80,7 @@ class DallasTemperature
   void begin(void) {}
 
   // returns the number of devices found on the bus
-  uint8_t getDeviceCount(void) { return 5; }
+  uint8_t getDeviceCount(void) { return 4; }
   
   // Is a conversion complete on the wire?
   bool isConversionComplete(void);
@@ -79,6 +91,12 @@ class DallasTemperature
   // finds an address at a given index on the bus 
   bool getAddress(uint8_t* addr, const uint8_t idx)
   {
+    if (idx<5)
+    {
+      memcpy(addr, defaultAddresses[idx], sizeof(DeviceAddress));
+      return true;      
+    }
+    
     // 28;xx;xx;xx;04;00;00;xx
     for (int i=0; i<8; i++)
     {      
@@ -138,10 +156,33 @@ class DallasTemperature
 
 //  static float last = 18.0f;
 
+  int counter;
   float last;  
+  int start_secs;
+  
   // returns temperature in degrees C
   float getTempC(uint8_t*)
   {
+    timeval time;
+    gettimeofday(&time, NULL);
+ 
+    long secs = time.tv_sec;
+    if (0==start_secs) start_secs = secs;
+ 
+    int mins =  (secs-start_secs)/30;
+    //printf("getTempC: mins=%i\n", mins);
+    
+    mins-=30;
+    //printf("getTempC: returning %i\n", mins);
+
+    return mins;
+
+  
+//    return -1.74;
+    counter = (counter+1)%1000;
+    if (500<counter) return 10.0;
+    return -10.0;
+  
     if (random()%10000>9998)
     {  
       last = 0.01f*(3200-(random()%1000));
