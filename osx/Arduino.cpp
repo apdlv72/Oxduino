@@ -17,6 +17,32 @@
 #include <pthread.h>    /* POSIX Threads */
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <termios.h>
+#include <sys/ioctl.h>
+
+#include <stdlib.h>
+#include <syslog.h>
+#include <signal.h>
+
+#include <CoreFoundation/CoreFoundation.h>
+#include <SystemConfiguration/SystemConfiguration.h>
+
+#include <IOKit/IOKitLib.h>
+#include <IOKit/pwr_mgt/IOPMLib.h>
+#include <IOKit/ps/IOPSKeys.h>
+#include <IOKit/ps/IOPowerSources.h>
+#include <IOKit/IOCFPlugIn.h>
+#include <IOKit/hid/IOHIDKeys.h>
+#include <IOKit/hid/IOHIDLib.h>
+
+#include <IOKit/serial/IOSerialKeys.h>
+#include <IOKit/IOBSD.h>
+
 
 extern void setup();
 extern void loop();
@@ -70,16 +96,138 @@ typedef struct
 	}
 	changed;
 
-	uint8_t eeprom_data[E2END+1];
+	//uint8_t eeprom_data[E2END+1];
+	uint8_t * eeprom_data;
 	int     analogRef;
 	boolean interrupts;
 }
 s_state;
 
+
 s_state currState;
+
 boolean oDumpEEProm = false;
 uint8_t doRestart   = true;
 unsigned long __micros_first = 0;
+
+#define EEPROM_SIZE E2END+1
+#define EEPROM_PATH "eeprom_data.bin"
+#define NUMINTS  (1000)
+//#define FILESIZE (NUMINTS * sizeof(int))
+
+#include <sys/mman.h>
+
+int eeprom_fd;
+
+
+int eeprom_init()
+{
+	int result;
+
+	// attempt to open for reading to check if it exists
+	boolean found = false;
+	eeprom_fd = open(EEPROM_PATH, O_RDWR, (mode_t)0600);
+	if (eeprom_fd == -1)
+	{
+		//perror("Error opening file for writing");
+		printf("****** NOT FOUND %s\n", EEPROM_PATH);
+	}
+	else
+	{
+		printf("****** FOUND %s\n", EEPROM_PATH);
+		close(eeprom_fd);
+		found = true;
+	}
+
+	/* Open a file for writing.
+	 *  - Creating the file if it doesn't exist.
+	 *
+	 * Note: "O_WRONLY" mode is not sufficient when mmaping.
+	 */
+	eeprom_fd = open(EEPROM_PATH, O_RDWR | O_CREAT , (mode_t)0600);
+	if (eeprom_fd == -1)
+	{
+		perror("Error opening file for writing");
+		exit(EXIT_FAILURE);
+	}
+
+	if (!found)
+	{
+		printf("****** INITIALIZING EEPROM WITH 0xFF\n");
+		// fill with ones (as a real eeprom would be when never written before)
+		for (int i=0; i<EEPROM_SIZE; i++)
+		{
+			write(eeprom_fd, "\xff", 1);
+		}
+	}
+/*
+	// Stretch the file size to the size of the eeprom
+	result = lseek(eeprom_fd, EEPROM_SIZE, SEEK_SET);
+	if (result == -1)
+	{
+		close(eeprom_fd);
+		perror("Error calling lseek() to 'stretch' the file");
+		exit(EXIT_FAILURE);
+	}
+
+//	  Something needs to be written at the end of the file to
+//	  have the file actually have the new size.
+//	  Just writing an empty string at the current file position will do.
+//
+//	  Note:
+//	   - The current position in the file is at the end of the stretched
+//	     file due to the call to lseek().
+//	   - An empty string is actually a single '\0' character, so a zero-byte
+//	     will be written at the last byte of the file.
+//
+//		lseek(eeprom_fd, 0, SEEK_SET);
+
+		result = write(eeprom_fd, "", 1);
+		if (result != 1)
+		{
+			close(eeprom_fd);
+			perror("Error writing last byte of the file");
+			exit(EXIT_FAILURE);
+		}
+	}
+	*/
+
+	/* Now the file is ready to be mmapped.
+	 */
+	currState.eeprom_data = (uint8_t*) mmap(0, EEPROM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, eeprom_fd, 0);
+	if (currState.eeprom_data == MAP_FAILED)
+	{
+		close(eeprom_fd);
+		perror("Error mmapping the file");
+		exit(EXIT_FAILURE);
+	}
+
+	/* Now write int's to the file as if it were memory (an array of ints).
+	 */
+//	for (i = 1; i <=NUMINTS; ++i)
+//	{
+//		map[i] = 2 * i;
+//	}
+
+
+	return 0;
+}
+
+
+void eeprom_exit()
+{
+	/* Don't forget to free the mmapped memory
+	 */
+	if (munmap(currState.eeprom_data, EEPROM_SIZE) == -1)
+	{
+		perror("Error un-mmapping the file");
+		/* Decide here whether to close(fd) and exit() or not. Depends... */
+	}
+
+	/* Un-mmaping doesn't close the file, so we still need to do that.
+	 */
+	close(eeprom_fd);
+}
 
 
 unsigned long micros(void)
@@ -228,6 +376,7 @@ void handleclient(int sock)
 	char buf[1024];
 
 	s_state lastState;
+	lastState.eeprom_data = (uint8_t*)malloc(EEPROM_SIZE);
 
 	for (;;)
 	{
@@ -370,32 +519,6 @@ void * server(void * data)
 }
 
 
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <termios.h>
-#include <sys/ioctl.h>
-
-#include <stdlib.h>
-#include <syslog.h>
-#include <signal.h>
-
-#include <CoreFoundation/CoreFoundation.h>
-#include <SystemConfiguration/SystemConfiguration.h>
-
-#include <IOKit/IOKitLib.h>
-#include <IOKit/pwr_mgt/IOPMLib.h>
-#include <IOKit/ps/IOPSKeys.h>
-#include <IOKit/ps/IOPowerSources.h>
-#include <IOKit/IOCFPlugIn.h>
-#include <IOKit/hid/IOHIDKeys.h>
-#include <IOKit/hid/IOHIDLib.h>
-
-#include <IOKit/serial/IOSerialKeys.h>
-#include <IOKit/IOBSD.h>
-
 /*
 void init_serial(int *fd, unsigned int baud)
 {
@@ -421,38 +544,39 @@ void init_serial(int *fd, unsigned int baud)
 
 int main(int argc, char * argv[])
 {
-	       if (argc>1)
-	       {
-	               const char * tty = argv[1];
-	               printf("OX: Opening %s\n", tty);
-	               int fd;
-	
-	               //fd = open("/dev/tty.SeriellerAnschluss", O_RDWR | O_NOCTTY | O_NDELAY);
-	               fd = open(tty, O_RDWR | O_NOCTTY | O_NDELAY);
-	               printf("OX: Opened RS232 on fd %i\n", fd);
-	
-	               if (fd == -1)
-	               {
-	            	   perror("OX: open_port: unable to open port");
-	            	   exit(2);
-	               }
-	
-	               init_port(&fd,9600);         //set serial port to 9600,8,n,1
-	               write(fd, "H\n", 2);
+	printf("Memory mapping %i bytes of eeprom to %s\n", EEPROM_SIZE, EEPROM_PATH);
+	eeprom_init();
 
-	               close(0);
-	               close(1);
-	               dup(fd);
-	               dup(fd);
-	               
-	               fprintf(stderr, "OX: DO YOU SEE STDOUT?\n");
-	               fprintf(stderr, "OX: DO YOU SEE STDERR?\n");
-	               fflush(stdout);
-	       }
-	
+	if (argc>1)
+	{
+		const char * tty = argv[1];
+		printf("OX: Opening %s\n", tty);
+		int fd;
+
+		//fd = open("/dev/tty.SeriellerAnschluss", O_RDWR | O_NOCTTY | O_NDELAY);
+		fd = open(tty, O_RDWR | O_NOCTTY | O_NDELAY);
+		printf("OX: Opened RS232 on fd %i\n", fd);
+
+		if (fd == -1)
+		{
+			perror("OX: open_port: unable to open port");
+			exit(2);
+		}
+
+		init_port(&fd,9600);         //set serial port to 9600,8,n,1
+		write(fd, "H\n", 2);
+
+		close(0);
+		close(1);
+		dup(fd);
+		dup(fd);
+
+		fprintf(stderr, "OX: DO YOU SEE STDOUT?\n");
+		fprintf(stderr, "OX: DO YOU SEE STDERR?\n");
+		fflush(stdout);
+	}
 
 	pthread_t server_thread;
-
 	pthread_create (&server_thread, NULL, server, NULL);
 
 	fflush(stderr);
