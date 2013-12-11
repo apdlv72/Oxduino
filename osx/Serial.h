@@ -134,10 +134,19 @@ class HardwareSerial //: public Print // Stream
     	return printNumber(n, base, false);
     }
 
-  size_t printNumber(unsigned long n, uint8_t base, boolean cr) {
+  size_t printNumber(long n, uint8_t base, boolean cr) {
+     if (n<0)
+     {
+       printf("-");
+       n=-n;
+    }
+    return 1+printNumberPos(n,base,cr); 
+  }
+  
+  size_t printNumberPos(unsigned long n, uint8_t base, boolean cr) {
     char buf[8 * sizeof(long) + 1]; // Assumes 8-bit chars plus zero byte.
     char *str = &buf[sizeof(buf) - 1];
-    
+
      *str = '\0';
 
      //if (10==base && n<10) printf("0");
