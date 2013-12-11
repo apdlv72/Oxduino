@@ -5,3 +5,5 @@ Oxduino.ino
 .cproject
 .project
 *.o
+Oxduino
+build/
