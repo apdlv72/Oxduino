@@ -120,7 +120,7 @@ unsigned long __micros_first = 0;
 int eeprom_fd;
 
 
-int eeprom_init()
+static int eeprom_init()
 {
 	int result;
 
@@ -585,7 +585,7 @@ int main(int argc, char * argv[])
 
 	fprintf(stderr, "OX: entering event loop\n");
 	fflush(stderr);
-	sleep(1);
+	//sleep(1);
 
 	while (doRestart)
 	{

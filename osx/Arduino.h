@@ -27,6 +27,11 @@ typedef uint8_t byte;
 typedef const char * PSTR;
 typedef const char * PGM_P;
 
+
+#define CHANGE 1
+#define FALLING 2
+#define RISING 3
+
 #define DEC 10
 #define HEX 16
 #define BIN  2
