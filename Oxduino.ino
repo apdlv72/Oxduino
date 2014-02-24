@@ -5,6 +5,10 @@ void serialEvent() {}
 void setup() 
 {
 	pinMode(13, OUTPUT);
+	Serial.begin(56000);
+	Serial.println("Hello World");
+	Serial.println(4711, DEC);
+	Serial.println(65535, HEX);
 }
 
 #define ABS(A) ( ((A)<0) ? (-(A)) : (A) )

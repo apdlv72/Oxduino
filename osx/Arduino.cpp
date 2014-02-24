@@ -43,6 +43,7 @@
 #include <IOKit/serial/IOSerialKeys.h>
 #include <IOKit/IOBSD.h>
 
+static int time_warp = 0;
 
 extern void setup();
 extern void loop();
@@ -238,6 +239,11 @@ unsigned long micros(void)
 	if (!__micros_first) __micros_first=m;
 	m-=__micros_first;
 	//printf("micros: %li\n", m);
+	
+	if (time_warp>0)
+	{
+		m *= time_warp;
+	}	
 	return m;
 }
 
@@ -542,10 +548,19 @@ void init_serial(int *fd, unsigned int baud)
 
 #include "Serial.h"
 
+
 int main(int argc, char * argv[])
 {
 	printf("Memory mapping %i bytes of eeprom to %s\n", EEPROM_SIZE, EEPROM_PATH);
 	eeprom_init();
+
+	const char* time_warp_str = getenv("OXDUINO_TIME_WARP");
+	if (time_warp_str)
+	{	
+		time_warp = atoi(time_warp_str);
+		printf("time_warp: %i\n", time_warp);
+	}
+		
 
 	if (argc>1)
 	{
@@ -600,4 +615,7 @@ int main(int argc, char * argv[])
 	}
 }
 
+
+void cli() {}
+void sei() {}
 

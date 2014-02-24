@@ -23,8 +23,9 @@
 #include <inttypes.h>
 #include <stdio.h> // for size_t
 
-//#include "WString.h"
-//#include "Printable.h"
+#include "WString.h"
+#include "Printable.h"
+#include <string.h>
 
 #define DEC 10
 #define HEX 16
@@ -40,8 +41,7 @@ class Print
   protected:
     void setWriteError(int err = 1) { write_error = err; }
   public:
-    Print() {}
-//    Print() : write_error(0) {}
+    Print() : write_error(0) {}
   
     int getWriteError() { return write_error; }
     void clearWriteError() { setWriteError(0); }
@@ -53,32 +53,30 @@ class Print
     }
     virtual size_t write(const uint8_t *buffer, size_t size);
     
-    //size_t print(const __FlashStringHelper *);
-    //size_t print(const String &);
-    size_t print(const char c[]) { printf("%s", c); };
-    size_t print(char c) { printf("%c", c); };
-    size_t print(unsigned char c, int = DEC) { printf("%i", c); };
-    size_t print(int i, int = DEC) { printf("%i", i); };
-    size_t print(unsigned int i, int = DEC) { printf("%i", i); };
-    size_t print(long i, int = DEC) { printf("%li", i); };
-    size_t print(unsigned long i, int = DEC) { printf("%li", i); };
-    size_t print(double d, int = 2) { printf("%2.1f", d); };
-    //size_t print(const char * s);
-    //size_t print(const Printable&);
+    size_t print(const __FlashStringHelper *);
+    size_t print(const String &);
+    size_t print(const char[]);
+    size_t print(char);
+    size_t print(unsigned char, int = DEC);
+    size_t print(int, int = DEC);
+    size_t print(unsigned int, int = DEC);
+    size_t print(long, int = DEC);
+    size_t print(unsigned long, int = DEC);
+    size_t print(double, int = 2);
+    size_t print(const Printable&);
 
-    //ize_t println(const __FlashStringHelper *);
-    //size_t println(const String &s);
-    size_t println(const char c[]) { printf("%s\n", c); };
+    size_t println(const __FlashStringHelper *);
+    size_t println(const String &s);
+    size_t println(const char[]);
     size_t println(char);
-    size_t println(unsigned char c, int = DEC) { printf("%c\n", c); };
-    size_t println(int i, int = DEC) { printf("%i\n", i); };
-    size_t println(unsigned int i, int = DEC) { printf("%i\n", i); };
+    size_t println(unsigned char, int = DEC);
+    size_t println(int, int = DEC);
+    size_t println(unsigned int, int = DEC);
     size_t println(long, int = DEC);
     size_t println(unsigned long, int = DEC);
-    size_t println(double d, int = 2) { printf("%2.1f\n", d); };
-    //size_t println(const char * s);
-    //size_t println(const Printable&);
-    size_t println(void) { printf("\n"); };
+    size_t println(double, int = 2);
+    size_t println(const Printable&);
+    size_t println(void);
 };
 
 #endif
