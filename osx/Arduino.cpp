@@ -333,9 +333,18 @@ void randomSeed(unsigned int seed)
 
 long random(long limit)
 {
-	long max = ((unsigned long)-1L)/2-1;
+	// man RANDOM(3)
+	// The random() function uses a non-linear, additive feedback, random number generator, 
+	// employing a default table of size 31 long integers.  It returns successive pseudo-random 
+	// numbers in the range from 0 to (2**31)-1
+	long rv = random();
+	return rv%limit;
+/*
+	long max = (((unsigned long)-1L)/2)-1;
 	long val = (long)(max*random());
-	return (0==limit) ? val : val%limit;
+	long rv = (0==limit) ? val : val%limit;
+	return rv;
+*/
 }
 
 
