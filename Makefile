@@ -12,7 +12,7 @@ CXXOPT=-Wgnu-designator
 
 all: $(NAME)
 
-$(NAME): osx/Oxduino.o osx/Arduino.o osx/Print.o osx/HardwareSerial.o osx/Stream.o osx/WString.o osx/RTClib.o osx/Wire.o osx/FastSPI_LED.o osx/TrueRandom.o osx/AES.o osx/eEEPROM.o osx/NecIR.o osx/MD5.o
+$(NAME): $(NAME).o osx/Oxduino.o osx/Arduino.o osx/Print.o osx/HardwareSerial.o osx/Stream.o osx/WString.o osx/RTClib.o osx/Wire.o osx/FastSPI_LED.o osx/TrueRandom.o osx/AES.o osx/eEEPROM.o osx/NecIR.o osx/MD5.o
 	g++ -g -o $(NAME) $(NAME).o osx/Oxduino.o osx/Arduino.o osx/Print.o osx/Stream.o osx/HardwareSerial.o osx/WString.o \
 				osx/eEEPROM.o osx/NecIR.o osx/RTClib.o osx/Wire.o osx/FastSPI_LED.o osx/TrueRandom.o osx/AES.o osx/MD5.o
 
