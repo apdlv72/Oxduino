@@ -10,16 +10,17 @@ INCL=-Iosx -I$(ARDUINO_LIBS)/eEEPROM -I$(ARDUINO_LIBS)/NecIR -I$(ARDUINO_LIBS)/A
 COPT=-Wgnu-designator 
 CXXOPT=-Wgnu-designator 
 
+all: $(NAME)
 
-all: osx/Oxduino.o osx/Arduino.o osx/Print.o  osx/HardwareSerial.o osx/Stream.o  osx/WString.o osx/RTClib.o osx/Wire.o osx/FastSPI_LED.o osx/TrueRandom.o osx/AES.o osx/eEEPROM.o osx/NecIR.o osx/MD5.o
-	g++ -g  -o $(NAME) $(NAME).o osx/Oxduino.o osx/Arduino.o osx/Print.o osx/Stream.o osx/HardwareSerial.o osx/WString.o \
+$(NAME): osx/Oxduino.o osx/Arduino.o osx/Print.o osx/HardwareSerial.o osx/Stream.o osx/WString.o osx/RTClib.o osx/Wire.o osx/FastSPI_LED.o osx/TrueRandom.o osx/AES.o osx/eEEPROM.o osx/NecIR.o osx/MD5.o
+	g++ -g -o $(NAME) $(NAME).o osx/Oxduino.o osx/Arduino.o osx/Print.o osx/Stream.o osx/HardwareSerial.o osx/WString.o \
 				osx/eEEPROM.o osx/NecIR.o osx/RTClib.o osx/Wire.o osx/FastSPI_LED.o osx/TrueRandom.o osx/AES.o osx/MD5.o
 
 %.o: %.cpp %.h
-	g++ -g -DOSX        -c $(INCL) -o $@ $<
+	g++ -g -DOSX -c $(INCL) -o $@ $<
 
 $(NAME).o: $(NAME).ino
-	g++ -g  -Wno-return-type -Wno-gnu-designator -DOSX -x c++ -c $(INCL) -o $(NAME).o $(NAME).ino
+	g++ -g -Wno-return-type -Wno-gnu-designator -DOSX -x c++ -c $(INCL) -o $(NAME).o $(NAME).ino
 
 osx/eEEPROM.o: $(ARDUINO_LIBS)/eEEPROM/eEEPROM.cpp
 	g++ -g -DOSX -c $(INCL) -o osx/eEEPROM.o $(ARDUINO_LIBS)/eEEPROM/eEEPROM.cpp
