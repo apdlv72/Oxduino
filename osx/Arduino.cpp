@@ -555,7 +555,7 @@ void init_serial(int *fd, unsigned int baud)
 }
 */
 
-#include "Serial.h"
+#include "HardwareSerial.h"
 
 
 int main(int argc, char * argv[])
@@ -587,7 +587,7 @@ int main(int argc, char * argv[])
 			exit(2);
 		}
 
-		init_port(&fd,9600);         //set serial port to 9600,8,n,1
+		HardwareSerial::init_port(&fd,9600);         //set serial port to 9600,8,n,1
 		write(fd, "H\n", 2);
 
 		close(0);

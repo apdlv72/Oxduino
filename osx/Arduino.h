@@ -13,10 +13,9 @@
 // for int8_t etc.:
 #include "Oxduino.h"
 
-#include "Serial.h"
+#include "HardwareSerial.h"
 
 extern uint8_t doRestart;
-
 
 unsigned long micros(void);
 unsigned long millis(void);
